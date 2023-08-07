@@ -4,19 +4,18 @@ import 'package:butler/services/firebase/firebase_storage.dart';
 import 'package:butler/services/firebase/firestore_database.dart';
 import 'package:butler/services/firebase/realtime_database.dart';
 import 'package:butler/ui/screens/expanded_news.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class ReadLists extends StatefulWidget {
+  const ReadLists({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<ReadLists> createState() => _ReadListsState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
+class _ReadListsState extends State<ReadLists>
     with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
@@ -31,17 +30,10 @@ class _HomeScreenState extends State<HomeScreen>
     //
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Home"),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  realtimeDatabase.testLimitChildNode();
-                },
-                icon: Icon(Icons.add))
-          ],
+          title: const Text("Read lists"),
         ),
         body: FutureBuilder<List<NewsModel>?>(
-            future: firestoreDatabase.getAllNews(),
+            future: realtimeDatabase.getReadListNews(authProvider.uid!),
             builder: ((context, snapshot) {
               List<NewsModel>? allNews = snapshot.data;
               if (snapshot.connectionState == ConnectionState.done &&
@@ -52,8 +44,6 @@ class _HomeScreenState extends State<HomeScreen>
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: () {
-                            firestoreDatabase.distributedCounter(
-                                "news/${allNews[index].id}", "views");
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) =>
                                     ExpandedNews(news: allNews[index])));
@@ -135,36 +125,6 @@ class _HomeScreenState extends State<HomeScreen>
                                       Text((allNews[index].views ?? 0)
                                           .toString()),
                                       Spacer(),
-                                      StreamBuilder<bool?>(
-                                        stream:
-                                            realtimeDatabase.isNewsInReadList(
-                                                authProvider.uid!,
-                                                allNews[index].id!),
-                                        builder: (context, snapshot) {
-                                          bool isInList =
-                                              snapshot.data ?? false;
-                                          return Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(isInList.toString()),
-                                              IconButton(
-                                                onPressed: () {
-                                                  realtimeDatabase
-                                                      .addNewsToReadList(
-                                                          authProvider.uid!,
-                                                          allNews[index]);
-                                                },
-                                                icon: Icon(
-                                                  Icons.list_alt_rounded,
-                                                  color: isInList
-                                                      ? Colors.blue
-                                                      : Colors.grey,
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      ),
                                     ],
                                   ),
                                 )

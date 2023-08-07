@@ -39,9 +39,9 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
     for (int i = 0; i < widget.barItems.length; i++) {
       BarItem item = widget.barItems[i];
       bool isSelected = widget.currentIndex == i;
-      if (i == 1) {
+      if (i == 2) {
         _barItems.add(const SizedBox(
-          width: 50.0,
+          width: 10.0,
         ));
       }
       _barItems.add(SizedBox(

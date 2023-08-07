@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "512660754973",
+    "firebase_url": "https://butler-2bcea-default-rtdb.firebaseio.com",
     "project_id": "butler-2bcea",
     "storage_bucket": "butler-2bcea.appspot.com"
   },
@@ -22,7 +23,7 @@
           }
         },
         {
-          "client_id": "512660754973-cqn6hu6rfmkpguda9bv7erdcsnknjc43.apps.googleusercontent.com",
+          "client_id": "512660754973-9voeak4lfpvkgtff8fblrom6gt13eim7.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -35,7 +36,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "512660754973-cqn6hu6rfmkpguda9bv7erdcsnknjc43.apps.googleusercontent.com",
+              "client_id": "512660754973-9voeak4lfpvkgtff8fblrom6gt13eim7.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

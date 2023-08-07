@@ -1,3 +1,4 @@
+import 'package:butler/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:butler/providers/setting_provider.dart';
 import 'package:butler/services/connexion.dart/connectivity_status.dart';
@@ -17,16 +18,20 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (_, settingsProvider, __) {
-        return AuthWidgetBuilder(
-          connectivityService: connectivityService,
-          builder: (BuildContext context, Future<bool> isInstalled) {
-            return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                title: "Bulter",
-                theme: ThemeData(
-                  primarySwatch: Colors.blue,
-                ),
-                home: HomePage());
+        return Consumer<AuthProvider>(
+          builder: (_, authProvider, __) {
+            return AuthWidgetBuilder(
+              connectivityService: connectivityService,
+              builder: (BuildContext context, Future<bool> isInstalled) {
+                return MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    title: "Bulter",
+                    theme: ThemeData(
+                      primarySwatch: Colors.blue,
+                    ),
+                    home: HomePage());
+              },
+            );
           },
         );
       },

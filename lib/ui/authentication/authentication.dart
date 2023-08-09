@@ -4,7 +4,6 @@ import 'package:butler/services/firebase/firestore_database.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class AuthenticationScreen extends StatefulWidget {
   const AuthenticationScreen({Key? key}) : super(key: key);
@@ -14,7 +13,7 @@ class AuthenticationScreen extends StatefulWidget {
 }
 
 //secondRegister
-enum FormType { signIn, signUp }
+enum FormType { signIn }
 
 class _AuthenticationScreenState extends State<AuthenticationScreen> {
   final formKey = GlobalKey<FormState>();
@@ -35,14 +34,6 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     FocusScope.of(context).unfocus();
     setState(() {
       _formType = FormType.signIn;
-    });
-  }
-
-  void moveToSignUp() {
-    formKey.currentState!.reset();
-    FocusScope.of(context).unfocus();
-    setState(() {
-      _formType = FormType.signUp;
     });
   }
 
@@ -78,36 +69,6 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
         ),
       ));
     } else {
-      if (_formType == FormType.signUp && _phoneNumber == null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.yellow[700],
-          duration: const Duration(seconds: 5),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const Icon(CommunityMaterialIcons.wifi_cancel,
-                  color: Colors.black),
-              const SizedBox(
-                width: 5.0,
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                        "Please provide a valid phone number to proceed. This information is necessary to complete the action. 📞",
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall!
-                            .copyWith(color: Colors.black)),
-                  ],
-                ),
-              )
-            ],
-          ),
-        ));
-      }
       await authProvider.signInWithGoogle(
           context: context, formType: _formType, phoneNumer: _phoneNumber);
     }
@@ -166,56 +127,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                       height: kToolbarHeight,
                     ),
                     Text(
-                      _formType == FormType.signUp ? "Sign Up" : "Sign In",
+                      "Sign In",
                       style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          OutlinedButton(
-                            onPressed: () {
-                              if (_formType != FormType.signIn) {
-                                moveToSignIn();
-                              }
-                            },
-                            style: OutlinedButton.styleFrom(
-                                backgroundColor: _formType != FormType.signIn
-                                    ? Colors.white
-                                    : Colors.blue),
-                            child: Text(
-                              "Sign In",
-                              style: TextStyle(
-                                  color: _formType == FormType.signIn
-                                      ? Colors.white
-                                      : Colors.blue),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 40,
-                          ),
-                          OutlinedButton(
-                            onPressed: () {
-                              if (_formType != FormType.signUp) {
-                                moveToSignUp();
-                              }
-                            },
-                            style: OutlinedButton.styleFrom(
-                                backgroundColor: _formType != FormType.signUp
-                                    ? Colors.white
-                                    : Colors.blue),
-                            child: Text(
-                              "Sign Up",
-                              style: TextStyle(
-                                  color: _formType == FormType.signUp
-                                      ? Colors.white
-                                      : Colors.blue),
-                            ),
-                          )
-                        ],
-                      ),
                     ),
                     Expanded(
                       child: Container(
@@ -241,62 +154,6 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _formType == FormType.signUp
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: InternationalPhoneNumberInput(
-                      ignoreBlank: false,
-                      autoValidateMode: AutovalidateMode.disabled,
-                      selectorTextStyle: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Theme.of(context)
-                              .buttonTheme
-                              .colorScheme!
-                              .primary),
-                      textFieldController: intlPhoneNumberController,
-                      formatInput: false,
-                      textStyle: Theme.of(context).textTheme.displaySmall,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          signed: true, decimal: true),
-                      inputDecoration: InputDecoration(
-                          contentPadding: const EdgeInsets.all(12.0),
-                          counterText: "",
-                          filled: false,
-                          focusedBorder: UnderlineInputBorder(
-                              borderRadius: BorderRadius.zero,
-                              borderSide: BorderSide(
-                                  color: Theme.of(context)
-                                      .buttonTheme
-                                      .colorScheme!
-                                      .primary)),
-                          errorBorder: UnderlineInputBorder(
-                            borderRadius: BorderRadius.zero,
-                            borderSide:
-                                BorderSide(color: Colors.red.withOpacity(0.5)),
-                          ),
-                          errorStyle: Theme.of(context)
-                              .textTheme
-                              .titleSmall!
-                              .copyWith(color: Colors.red),
-                          hintText: "Your phone number",
-                          hintStyle: Theme.of(context).textTheme.headlineSmall),
-                      onFieldSubmitted: (String value) {},
-                      onSaved: (phone) => _phoneNumber = phone.phoneNumber,
-                      onInputChanged: (phone) =>
-                          _phoneNumber = phone.phoneNumber,
-                      onInputValidated: (bool value) {},
-                      selectorConfig: const SelectorConfig(
-                          selectorType: PhoneInputSelectorType.DIALOG,
-                          setSelectorButtonAsPrefixIcon: false,
-                          showFlags: false,
-                          trailingSpace: false),
-                    ),
-                  )
-                : const SizedBox(),
-            const SizedBox(
-              width: 20,
-            ),
             Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,

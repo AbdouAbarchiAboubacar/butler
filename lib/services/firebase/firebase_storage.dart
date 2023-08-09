@@ -9,4 +9,7 @@ import 'package:butler/services/firebase/firebase_storage_service.dart';
 class FirebaseFileStorage {
   final _firebaseStorageService = FirebaseStorageService.instance;
   FirebaseFileStorage();
+
+  Future<String?> getDownloadUrlAndFileName(String filePath) =>
+      _firebaseStorageService.getDownloadUrlAndFileNameService(filePath);
 }

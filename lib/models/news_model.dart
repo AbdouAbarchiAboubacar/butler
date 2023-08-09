@@ -4,7 +4,7 @@ class NewsModel {
 
   NewsModel(
       {required this.authorUid,
-      this.id,
+      required this.id,
       this.title,
       this.content,
       this.coverImage,

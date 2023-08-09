@@ -10,6 +10,7 @@ import 'package:butler/ui/screens/account.dart';
 import 'package:butler/ui/screens/add.dart';
 import 'package:butler/ui/screens/read_lists.dart';
 import 'package:butler/ui/screens/home_screen.dart';
+import 'package:butler/init_downloader.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -51,6 +52,13 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    FlutterDownloaderInitializer().initializeDownloader(context);
+  }
+
+  @override
+  void dispose() {
+    FlutterDownloaderInitializer().dispose();
+    super.dispose();
   }
 
   @override

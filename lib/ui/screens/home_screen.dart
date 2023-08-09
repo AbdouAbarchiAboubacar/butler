@@ -3,9 +3,12 @@ import 'package:butler/providers/auth_provider.dart';
 import 'package:butler/services/firebase/firebase_storage.dart';
 import 'package:butler/services/firebase/firestore_database.dart';
 import 'package:butler/services/firebase/realtime_database.dart';
+import 'package:butler/ui/screens/account.dart';
 import 'package:butler/ui/screens/expanded_news.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -34,8 +37,22 @@ class _HomeScreenState extends State<HomeScreen>
           title: const Text("Home"),
           actions: [
             IconButton(
-                onPressed: () {
-                  realtimeDatabase.testLimitChildNode();
+                onPressed: () async {
+                  FlutterClipboard.copy(
+                      'https://firebasestorage.googleapis.com/v0/b/butler-2bcea.appspot.com/o/M08mh3hvSqTwQroE4CkVnB8A9E9M.pdf?alt=media&token=f1b4fafa-18bf-4692-8fe5-8f6222325f7f');
+                  // realtimeDatabase.testLimitChildNode();
+                  // String? dir = await requestDownloadFolderPathService();
+                  // print("//? save dir ===>  $dir");
+                  // if (dir != null) {
+                  //   await FlutterDownloader.enqueue(
+                  //     url:
+                  //         "https://firebasestorage.googleapis.com/v0/b/butler-2bcea.appspot.com/o/M08mh3hvSqTwQroE4CkVnB8A9E9M.pdf?alt=media&token=f1b4fafa-18bf-4692-8fe5-8f6222325f7f",
+                  //     savedDir: dir,
+                  //     fileName: "",
+                  //     showNotification: true,
+                  //     openFileFromNotification: true,
+                  //   );
+                  // }
                 },
                 icon: Icon(Icons.add))
           ],

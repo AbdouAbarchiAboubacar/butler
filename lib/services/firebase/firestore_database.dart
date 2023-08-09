@@ -57,9 +57,9 @@ class FirestoreDatabase {
       );
   //
 
-  Future<void> uploadNews(NewsModel newsModel) async =>
+  Future<void> uploadNews(String id, NewsModel newsModel) async =>
       await _firestoreService.setData(
-          path: FirestorePath.news(const Uuid().v1()), data: newsModel.toMap());
+          path: FirestorePath.news(id), data: newsModel.toMap());
   //
 
   // Method to get news
@@ -67,4 +67,7 @@ class FirestoreDatabase {
         path: "news",
         builder: (data, documentId) => NewsModel.fromMap(data, documentId),
       );
+  //
+  Future<void> initPublicContact(String uid, Map<String, dynamic> data) async =>
+      await _firestoreService.setData(path: "/publicContacts/$uid", data: data);
 }

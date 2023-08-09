@@ -10,6 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class Add extends StatefulWidget {
   final void Function() onNewsUploaded;
@@ -99,12 +100,14 @@ class _AddState extends State<Add> {
             _selectedCoverImageFile!.path.split('/').last,
             _selectedCoverImageFile!.path,
             authProvider.uid);
+        String newsId = const Uuid().v1();
         NewsModel newsModel = NewsModel(
+            id: newsId,
             authorUid: authProvider.uid,
             title: _title,
             content: _content,
             coverImage: uploadedCoverImageUrl);
-        await firestoreDatabase.uploadNews(newsModel);
+        await firestoreDatabase.uploadNews(newsId, newsModel);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.green[700],
           duration: const Duration(seconds: 5),

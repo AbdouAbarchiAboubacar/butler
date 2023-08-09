@@ -1,6 +1,6 @@
-import 'package:butler/models/user_model.dart';
 import 'package:butler/services/firebase/firestore_database.dart';
 import 'package:butler/ui/authentication/authentication.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -107,11 +107,8 @@ class AuthProvider extends ChangeNotifier {
         _status = Status.authenticating;
         notifyListeners();
         await _auth.signInWithCredential(_authCredential!);
-        //* Save New User Data
-        await registerNewUser(
-            user: _auth.currentUser!,
-            phoneNumer: phoneNumer,
-            verifyIfUserExist: formType == FormType.signUp);
+        //* complete sign in
+        await registerNewUser(user: _auth.currentUser!);
         notifyListeners();
         return;
       }
@@ -127,25 +124,15 @@ class AuthProvider extends ChangeNotifier {
   //* =======================>   Others Methods <====================================================================================
 
   //* Method to save new user data
-  Future<void> registerNewUser({
-    required User user,
-    required String? phoneNumer,
-    required bool verifyIfUserExist,
-  }) async {
-    if (!verifyIfUserExist) {
-      UserModel userModel = UserModel(uid: user.uid);
-      await FirestoreDatabase().setNewUserData(userModel, userModel.uid!);
-    } else {
-      bool userExist = await FirestoreDatabase().ifUserExist(user.uid);
-      if (!userExist) {
-        UserModel userModel = UserModel(
-          uid: user.uid,
-          displayName: user.displayName,
-          phoneNumer: phoneNumer,
-        );
-        await FirestoreDatabase().setNewUserData(userModel, user.uid);
+  Future<void> registerNewUser({required User user}) async {
+    await FirestoreDatabase().ifUserExist(user.uid).then((value) {
+      if (!value) {
+        FirestoreDatabase().initPublicContact(user.uid, {
+          "createdAt": FieldValue.serverTimestamp(),
+          "updatedAt": FieldValue.serverTimestamp()
+        });
       }
-    }
+    });
   }
 
   FirebaseAuth? currentUserAuth() {
@@ -166,6 +153,7 @@ class AuthProvider extends ChangeNotifier {
       _uid = null;
       _authenticationStatus = EnumAuthenticated.notAuthenticated;
       _status = Status.uinitialized;
+      signOut();
       notifyListeners();
     });
   }

@@ -1,11 +1,16 @@
-import 'package:butler/ui/firebase/firebase_storage.dart';
-import 'package:butler/ui/firebase/firestore_database.dart';
-import 'package:butler/ui/firebase/realtime_database.dart';
+import 'package:butler/providers/auth_provider.dart';
+import 'package:butler/services/firebase/firebase_storage.dart';
+import 'package:butler/services/firebase/firestore_database.dart';
+import 'package:butler/services/firebase/realtime_database.dart';
+import 'package:butler/ui/authentication/authentication.dart';
+import 'package:butler/ui/screens/search.dart';
 import 'package:flutter/material.dart';
 import 'package:butler/ui/widget/animated_bottom_bar.dart';
 import 'package:butler/ui/screens/account.dart';
 import 'package:butler/ui/screens/add.dart';
+import 'package:butler/ui/screens/read_lists.dart';
 import 'package:butler/ui/screens/home_screen.dart';
+import 'package:butler/init_downloader.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -24,6 +29,16 @@ class _HomePageState extends State<HomePage>
       color: Colors.blue,
     ),
     BarItem(
+      text: "Search",
+      icon: Icons.search,
+      color: Colors.blue,
+    ),
+    BarItem(
+      text: "List",
+      icon: Icons.list_alt_rounded,
+      color: Colors.blue,
+    ),
+    BarItem(
       text: "compte",
       icon: Icons.account_box_rounded,
       color: Colors.blue,
@@ -37,11 +52,20 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    FlutterDownloaderInitializer().initializeDownloader(context);
+  }
+
+  @override
+  void dispose() {
+    FlutterDownloaderInitializer().dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    //
+    final authProvider = Provider.of<AuthProvider>(context, listen: true);
     //
     final firestoreDatabase = Provider.of<FirestoreDatabase>(context);
     //
@@ -62,10 +86,21 @@ class _HomePageState extends State<HomePage>
               child: PageView(
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
-                children: const <Widget>[
-                  HomeScreen(),
-                  Account(),
-                  Add(),
+                children: <Widget>[
+                  const HomeScreen(),
+                  const Search(),
+                  const ReadLists(),
+                  authProvider.uid == null
+                      ? const AuthenticationScreen()
+                      : const Account(),
+                  Add(
+                    onNewsUploaded: () {
+                      setState(() {
+                        selectedBarIndex = 0;
+                      });
+                      _pageController.jumpToPage(0);
+                    },
+                  ),
                 ],
                 onPageChanged: (int index) {
                   setState(() {
@@ -92,7 +127,7 @@ class _HomePageState extends State<HomePage>
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
-        notchMargin: 1,
+        notchMargin: 5,
         shape: const CircularNotchedRectangle(),
         height: kToolbarHeight + 8,
         child: Row(

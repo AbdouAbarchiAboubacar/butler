@@ -1,0 +1,16 @@
+
+========>  command generate keystore
+keytool -genkey -alias butlerNewsAndroid -validity 36500 -storetype JKS -keyalg RSA -keystore keystore
+=>Password: butlerNewsAndroidFirebaseBuilders23
+=>FirstNameLastName: Aboubacar Abdou Abarchi
+=> Organizational unit: Butler News
+=> Organization: Butler News
+=> City or Locality: Niamey
+=> State or Province: Niger
+=> Two-letter country code for this unit: NE
+
+========>  command line to get SH1 for keystore file ( RELEASE MODE)
+keytool -list -v -keystore keystore -alias butlerNewsAndroid
+
+SHA1: 63:CB:40:3E:52:BB:96:9E:33:57:7B:72:1C:CC:23:82:91:5D:BD:4B
+         SHA256: 06:91:E2:60:AA:BE:96:CF:EE:D1:7B:0A:01:3B:70:90:05:D0:81:96:C9:90:D1:49:6E:F6:2D:37:3A:DF:81:86

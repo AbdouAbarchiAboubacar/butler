@@ -1,6 +1,6 @@
-import 'package:butler/ui/firebase/firebase_storage.dart';
-import 'package:butler/ui/firebase/firestore_database.dart';
-import 'package:butler/ui/firebase/realtime_database.dart';
+import 'package:butler/services/firebase/firebase_storage.dart';
+import 'package:butler/services/firebase/firestore_database.dart';
+import 'package:butler/services/firebase/realtime_database.dart';
 import 'package:flutter/material.dart';
 import 'package:butler/providers/setting_provider.dart';
 import 'package:butler/services/connexion.dart/connectivity_service.dart';

@@ -55,8 +55,8 @@ class RealTimeDatabaseService {
             Map<dynamic, dynamic>.from(snapshot.value as Map<dynamic, dynamic>);
 
         for (var element in newsMap.entries) {
-          NewsModel news = NewsModel.fromMap(
-              Map<String?, dynamic>.from(element.value), element.key);
+          NewsModel news =
+              NewsModel.fromMap(Map<String?, dynamic>.from(element.value));
 
           readListNews.add(news);
         }

@@ -107,8 +107,11 @@ class AuthProvider extends ChangeNotifier {
         _status = Status.authenticating;
         notifyListeners();
         await _auth.signInWithCredential(_authCredential!);
+        //* send welcome mail
+        await sendWelcomeEmail(user: _auth.currentUser!);
         //* complete sign in
         await registerNewUser(user: _auth.currentUser!);
+        FirestoreDatabase().createProfilePDFDocument(_auth.currentUser!);
         notifyListeners();
         return;
       }
@@ -124,6 +127,25 @@ class AuthProvider extends ChangeNotifier {
   //* =======================>   Others Methods <====================================================================================
 
   //* Method to save new user data
+  Future<void> sendWelcomeEmail({required User user}) async {
+    await FirestoreDatabase().ifWelcomeEmailAlreadySend(user.uid).then((value) {
+      if (!value) {
+        Map<String, dynamic> data = {
+          "to": user.email,
+          "message": {
+            "subject": "Welcome to Butler News!",
+            "text":
+                "Hello ${user.displayName},Welcome to Butler News! We're excited to have you join our community. Here are a few things you can do with our app:Explore a wide range of News on various topics.Save News to your reading list.Interact with other users through comments and discussions.If you have any questions or need assistance, feel free to reach out to our support team at aboubacarabdouabarchidev@gmail.com.",
+            "html":
+                """<!DOCTYPE html><html><head><title>Welcome to Butler News!</title></head><body><p>Hello ${user.displayName},</p><p>Welcome to Butler News! We're excited to have you join our community. Here are a few things you can do with our app:</p><ul><li>Explore a wide range of News on various topics.</li><li>Save News to your reading list.</li><li>Interact with other users through comments and discussions.</li></ul><p>If you have any questions or need assistance, feel free to reach out to our support team at <a href="mailto:aboubacarabdouabarchidev@gmail.com">aboubacarabdouabarchidev@gmail.com</a>.</p><p>Best regards,<br>The Butler News Team</p></body></html>""",
+          },
+        };
+        FirestoreDatabase().sendWelcomeEmail(data, user.uid);
+      }
+    });
+  }
+
+  //* Method to save new user data
   Future<void> registerNewUser({required User user}) async {
     await FirestoreDatabase().ifUserExist(user.uid).then((value) {
       if (!value) {
@@ -137,6 +159,13 @@ class AuthProvider extends ChangeNotifier {
 
   FirebaseAuth? currentUserAuth() {
     return _auth;
+  }
+
+  Future<void> updateProfileImage(String photoURL) async {
+    _auth.currentUser!.updatePhotoURL(photoURL).then((value) {
+      FirestoreDatabase().createProfilePDFDocument(_auth.currentUser!);
+      notifyListeners();
+    });
   }
 
   /// Method to handle user signing out

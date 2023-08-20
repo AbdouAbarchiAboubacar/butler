@@ -13,9 +13,11 @@ class RealTimeDatabase {
       _realTimeDatabaseService.addNewsToReadListService(uid, news);
 
   //
-  Stream<bool?> isNewsInReadList(String uid, String newsId) =>
-      _realTimeDatabaseService.isNewsInReadListService(uid, newsId);
+  Stream<bool?>? isNewsInReadList(String? uid, String newsId) => uid == null
+      ? null
+      : _realTimeDatabaseService.isNewsInReadListService(uid, newsId);
   //
-  Future<List<NewsModel>?> getReadListNews(String uid) =>
-      _realTimeDatabaseService.getReadListNewsServices(uid: uid);
+  Future<List<NewsModel>?>? getReadListNews(String? uid) => uid == null
+      ? null
+      : _realTimeDatabaseService.getReadListNewsServices(uid: uid);
 }

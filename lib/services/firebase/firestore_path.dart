@@ -17,6 +17,7 @@ class FirestorePath {
 
   ///
   static String newUser(String? uid) => 'users/$uid';
+  static String wencomeEmail(String? uid) => 'welcomeMail/$uid';
   static String userPath(String? uid) => 'users/$uid';
   static String verifyUser(String uid) => 'users/$uid';
 

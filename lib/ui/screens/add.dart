@@ -25,6 +25,7 @@ class _AddState extends State<Add> {
   final picker = ImagePicker();
   File? _selectedCoverImageFile;
   String? _title, _content;
+  bool uploaded = false;
 
   @override
   void initState() {
@@ -44,7 +45,8 @@ class _AddState extends State<Add> {
       AuthProvider authProvider,
       FirestoreDatabase firestoreDatabase,
       BuildContext context,
-      ConnectivityStatus connectivity) async {
+      ConnectivityStatus connectivity,
+      FirebaseFileStorage firebaseFileStorage) async {
     FocusScope.of(context).unfocus();
     if (validateAndSave()) {
       if (connectivity == ConnectivityStatus.offline) {
@@ -71,7 +73,31 @@ class _AddState extends State<Add> {
           ),
         ));
       } else {
-        if (_selectedCoverImageFile == null) {
+        if (authProvider.uid == null) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            backgroundColor: Colors.yellow[700],
+            duration: const Duration(seconds: 5),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Authentication required",
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall!
+                              .copyWith(color: Colors.black)),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ));
+          return;
+        } else if (_selectedCoverImageFile == null) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             backgroundColor: Colors.yellow[700],
             duration: const Duration(seconds: 5),
@@ -96,16 +122,21 @@ class _AddState extends State<Add> {
           ));
           return;
         }
+        setState(() {
+          uploaded = true;
+        });
         String? uploadedCoverImageUrl = await upload(
             _selectedCoverImageFile!.path.split('/').last,
             _selectedCoverImageFile!.path,
-            authProvider.uid);
+            authProvider.uid,
+            firebaseFileStorage);
         String newsId = const Uuid().v1();
         NewsModel newsModel = NewsModel(
             id: newsId,
             authorUid: authProvider.uid,
             title: _title,
             content: _content,
+            text: _content,
             coverImage: uploadedCoverImageUrl);
         await firestoreDatabase.uploadNews(newsId, newsModel);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -135,7 +166,9 @@ class _AddState extends State<Add> {
           _content = null;
           _selectedCoverImageFile = null;
           formKey.currentState!.reset();
+          uploaded = false;
         });
+        await Future.delayed(const Duration(seconds: 2));
         widget.onNewsUploaded();
       }
     }
@@ -151,8 +184,11 @@ class _AddState extends State<Add> {
     }
   }
 
-  Future<String?> upload(fileName, filePath, authUid) async {
+  Future<String?> upload(fileName, filePath, authUid,
+      FirebaseFileStorage firebaseFileStorage) async {
     String extension = fileName.toString().split(".").last;
+    String resizedFilename =
+        "${fileName.toString().split(".")[0]}_500x500.$extension";
     Reference storageReference = FirebaseStorage.instance
         .ref()
         .child("news")
@@ -160,9 +196,13 @@ class _AddState extends State<Add> {
         .child(fileName);
     final UploadTask uploadTask = storageReference.putFile(
         File(filePath), SettableMetadata(contentType: 'image/$extension'));
-    var fileUrl = await (await uploadTask).ref.getDownloadURL();
-    String url = fileUrl.toString();
-    return url;
+    // var fileUrl = await (await uploadTask).ref.getDownloadURL();
+    return await uploadTask.then((snapshot) async {
+      await Future.delayed(const Duration(seconds: 5));
+      String? url = await firebaseFileStorage
+          .getDownloadUrlAndFileName("/news/$authUid/$resizedFilename");
+      return url;
+    });
   }
 
   @override
@@ -184,19 +224,36 @@ class _AddState extends State<Add> {
     final connectivity = Provider.of<ConnectivityStatus>(context, listen: true);
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add news"),
+        title: const Text("Add news"),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () {
-                validateAndSubmit(
-                    authProvider, firestoreDatabase, context, connectivity);
+                validateAndSubmit(authProvider, firestoreDatabase, context,
+                    connectivity, firebaseFileStorage);
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
-              child: const Text(
-                "upload",
-                style: TextStyle(color: Colors.blue),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "upload",
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  uploaded
+                      ? const SizedBox(
+                          height: 15,
+                          width: 15,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const SizedBox()
+                ],
               ),
             ),
           )
@@ -238,13 +295,6 @@ class _AddState extends State<Add> {
                           onSaved: (value) => _title = value,
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.mic,
-                          color: Colors.blue,
-                        ),
-                      )
                     ],
                   ),
                 ),
@@ -272,13 +322,6 @@ class _AddState extends State<Add> {
                           onSaved: (value) => _content = value,
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.mic,
-                          color: Colors.blue,
-                        ),
-                      )
                     ],
                   ),
                 ),

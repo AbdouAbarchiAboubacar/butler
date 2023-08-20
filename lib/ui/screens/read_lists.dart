@@ -33,7 +33,7 @@ class _ReadListsState extends State<ReadLists>
           title: const Text("Read lists"),
         ),
         body: FutureBuilder<List<NewsModel>?>(
-            future: realtimeDatabase.getReadListNews(authProvider.uid!),
+            future: realtimeDatabase.getReadListNews(authProvider.uid),
             builder: ((context, snapshot) {
               List<NewsModel>? allNews = snapshot.data;
               if (snapshot.connectionState == ConnectionState.done &&

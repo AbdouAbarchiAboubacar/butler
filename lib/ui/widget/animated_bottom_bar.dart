@@ -1,4 +1,7 @@
+import 'package:butler/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AnimatedBottomBar extends StatefulWidget {
   final List<BarItem> barItems;
@@ -23,18 +26,20 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
 
   @override
   Widget build(BuildContext context) {
+    //
+    final authProvider = Provider.of<AuthProvider>(context, listen: true);
     return Container(
       color: Colors.transparent,
       child: Row(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: _buildBarItems(),
+        children: _buildBarItems(authProvider),
       ),
     );
   }
 
-  List<Widget> _buildBarItems() {
+  List<Widget> _buildBarItems(AuthProvider authProvider) {
     List<Widget> _barItems = [];
     for (int i = 0; i < widget.barItems.length; i++) {
       BarItem item = widget.barItems[i];
@@ -46,16 +51,65 @@ class _AnimatedBottomBarState extends State<AnimatedBottomBar>
       }
       _barItems.add(SizedBox(
         height: 50,
+        width: 50,
         child: Stack(
           children: [
             Center(
               child: IconButton(
                   tooltip: item.text,
-                  icon: Icon(
-                    item.icon,
-                    size: isSelected ? 33 : 30,
-                    color: isSelected ? item.color : Colors.grey,
-                  ),
+                  icon: item.text == "compte"
+                      ? SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: authProvider.user == null
+                              ? Icon(
+                                  item.icon,
+                                  size: isSelected ? 33 : 30,
+                                  color: isSelected ? item.color : Colors.grey,
+                                )
+                              : ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(50)),
+                                  child: CachedNetworkImage(
+                                    imageUrl: authProvider.user!.photoURL!,
+                                    fit: BoxFit.fitWidth,
+                                    progressIndicatorBuilder:
+                                        (context, url, downloadProgress) =>
+                                            Container(
+                                      height: 40,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .dividerTheme
+                                            .color,
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(30.0)),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                      height: 40,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .dividerTheme
+                                            .color,
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(30.0)),
+                                      ),
+                                      child: const Center(
+                                        child: Icon(Icons.account_circle,
+                                            color: Colors.grey),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                        )
+                      : Icon(
+                          item.icon,
+                          size: isSelected ? 33 : 30,
+                          color: isSelected ? item.color : Colors.grey,
+                        ),
                   onPressed: () {
                     setState(() {
                       selectedBarIndex = i;

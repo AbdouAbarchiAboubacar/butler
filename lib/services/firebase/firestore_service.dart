@@ -25,6 +25,23 @@ class FirestoreService {
     });
   }
 
+  Future<void> createProfilePDFDocumentService({
+    required String path,
+    required Map<String, dynamic> data,
+    bool merge = false,
+  }) async {
+    final reference = FirebaseFirestore.instance.doc(path);
+    await reference.get().then((doc) async {
+      if (doc.exists) {
+        await reference.delete().then((value) async {
+          await reference.set(data);
+        });
+      } else {
+        await reference.set(data);
+      }
+    });
+  }
+
   Future<void> distributedCounterService(
       {required String path, required String field}) async {
     await FirebaseFirestore.instance.doc(path).get().then((doc) async {
@@ -134,7 +151,17 @@ class FirestoreService {
     Query Function(Query query)? queryBuilder,
     int Function(T lhs, T rhs)? sort,
   }) {
-    Query query = FirebaseFirestore.instance.collection(path!);
+    Query query = FirebaseFirestore.instance
+        .collection(path!)
+        .where("attribute_scores.TOXICITY", isLessThan: 50)
+        .orderBy("attribute_scores.TOXICITY")
+        .where("createdAt")
+        .orderBy('createdAt', descending: true);
+    //   .where("INSULT", isLessThan: 50);
+    // .where("PROFANITY", isLessThan: 50)
+    // .where("IDENTITY_ATTACK", isLessThan: 50)
+    // .where("SEVERE_TOXICITY", isLessThan: 50)
+    // .where("THREAT", isLessThan: 50);
     if (queryBuilder != null) {
       query = queryBuilder(query);
     }
@@ -151,5 +178,19 @@ class FirestoreService {
       }
       return result;
     });
+  }
+
+  //
+  Future<List<T>> getDocumentsByPaths<T>(
+      {required List<String> paths,
+      required T Function(Map<String, dynamic> data) builder}) async {
+    List<Map<String, dynamic>> result = [];
+
+    for (var element in paths) {
+      DocumentSnapshot<Map<String, dynamic>> doc =
+          await FirebaseFirestore.instance.doc(element).get();
+      result.add(doc.data() as Map<String, dynamic>);
+    }
+    return result.map((e) => builder(e)).toList();
   }
 }
